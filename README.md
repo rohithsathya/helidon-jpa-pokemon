@@ -25,8 +25,8 @@ java -jar target/helidon-jpa-pokemon.jar
 
 
 ```
-curl -X GET http://localhost:8080/greet
-{"message":"Hello World!"}
+curl -X GET http://localhost:8080/pokemon
+[{"id":"p1","name":"Pikachu","type":"Electric","age":8},{"id":"p2","name":"Eevee","type":"Normal","age":3},{"id":"p3","name":"Charizard","type":"Flying","age":9}]
 ```
 
 ## Try health and metrics
@@ -47,6 +47,8 @@ curl -H 'Accept: application/json' -X GET http://localhost:8080/metrics
 . . .
 ```
 
-## Try health and metrics
+## Todo
+|Todo|
+|---------|
 | Pagination |
 | Security |
