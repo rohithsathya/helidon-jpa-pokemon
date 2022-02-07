@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
@@ -23,7 +24,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.rsat.helidon.pokemon.GreetResource;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+
 import com.rsat.helidon.pokemon.dto.PokemonDto;
 import com.rsat.helidon.pokemon.exception.PokemonValidationException;
 import com.rsat.helidon.pokemon.service.PokemonService;
@@ -31,52 +33,32 @@ import com.rsat.helidon.pokemon.service.PokemonService;
 import io.helidon.security.SecurityContext;
 
 /**
- * A simple JAX-RS resource to greet you. Examples:
+ * A simple JAX-RS resource to Manage Pokemons. Examples:
  *
- * Get default greeting message: curl -X GET http://localhost:8080/greet
+ * Get list of all Pokemons: curl -X GET http://localhost:8080/pokemon
  *
- * The message is returned as a JSON object.
+ * The message is returned as a JSON Array consisting of Pokemons.
  */
 @Dependent
 @Path("/pokemon")
 public class PokemonResource {
 
-	private static final Logger LOGGER = Logger.getLogger(GreetResource.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PokemonResource.class.getName());
 
-//	@PersistenceContext
-//	private EntityManager em;
-//
 	private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
-//
-//	private final String message;
-//
-//	@Inject
-//	private PokemonRepository pokemonRepository;
 
 	@Inject
 	private PokemonService pokemonService;
 
-//	@Inject
-//	public GreetResource(@ConfigProperty(name = "app.greeting") String message) {
-//		this.message = message;
-//	}
 
 	/**
-	 * Return a worldly greeting message.
+	 * Returns list of all the Pokemon in our DB.
 	 *
-	 * @return {@link JsonObject}
+	 * @return {@link JsonArray}
 	 */
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public JsonObject getDefaultMessage() {
-//        String msg = String.format("%s %s!", message, "World");
-//        return JSON.createObjectBuilder()
-//                .add("message", msg)
-//                .build();
-//    }
-
+	@Operation(summary = "Returns list of all the Pokemon", 
+	        description = "Returns list of all the Pokemon")
 	@GET
-//	@Path("pokemon")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Transactional
 	public Response getAllPokemons() {
@@ -95,6 +77,13 @@ public class PokemonResource {
 		}
 	}
 
+	/**
+	 * Returns the Pokemon for a given Id.
+	 *
+	 * @return {@link PokemonDto}
+	 */
+	@Operation(summary = "Returns the Pokemon for a given Id", 
+	        description = "Returns the Pokemon for a given Id")
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -120,12 +109,19 @@ public class PokemonResource {
 
 	
 
+	/**
+	 * Returns list of all Pokemons for a given Type.
+	 *
+	 * @return {@link JsonArray}
+	 */
+	@Operation(summary = "Returns list of all Pokemons for a given Type.", 
+	        description = "Returns list of all Pokemons for a given Type.")
 	@GET
 	@Path("type/{pokemonType}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Transactional
 	public Response getByType(@PathParam("pokemonType") String pokemonType) {
-		LOGGER.fine("API : Get Pokemon by type /:type");
+		LOGGER.fine("API : Get Pokemon by type /:type" + pokemonType);
 		try {
 			JsonArrayBuilder builder = JSON.createArrayBuilder();
 			List<PokemonDto> list = pokemonService.getByType(pokemonType);
@@ -142,19 +138,20 @@ public class PokemonResource {
 	}
 
 	/**
-	 * Create a new TODO entry.
-	 * 
-	 * @param jsonObject the value of the new entry
-	 * @param context    security context to map the user
-	 * @return the response ({@code 200} status if successful
+	 * Adds new Pokemon to our DB.
+	 *
+	 * @param jsonObject new pokemon to insert
+	 * @return {@link JsonArray}
 	 */
+	@Operation(summary = "Adds given pokemon to system.", 
+	        description = "Adds given pokemon to system.")
 	@POST
-	// @Path("add")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Transactional
 	public Response save(final JsonObject pokemonJsonObj, @Context final SecurityContext context) {
-
+		
+		//TODO: Implement security and role check
 		// String userId = getUserId(context);
 		LOGGER.fine("API : Post Pokemon");
 		try {
@@ -179,15 +176,24 @@ public class PokemonResource {
 
 	}
 
+	/**
+	 * Updates given Pokemon based on its Id.
+	 *
+	 * @param jsonObject new Pokemon to update
+	 * @return {@link PokemonDto}
+	 */
+	@Operation(summary = "Updates given Pokemon based on its Id.", 
+	        description = "Updates given Pokemon based on its Id.")
 	@PUT
-	// @Path("{pokemonId}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Transactional
-	// @PathParam("pokemonId") String pokemonId,
 	public Response update(final JsonObject pokemonJsonObj, @Context final SecurityContext context) {
 
 		LOGGER.fine("API : Put Pokemon");
+		//TODO: Implement security and role check
+		// String userId = getUserId(context);
+		
 		try {
 			PokemonDto pokemonDto = pokemonService.update(pokemonJsonObj);
 			if (pokemonDto != null) {
@@ -208,6 +214,14 @@ public class PokemonResource {
 		}
 
 	}
+	
+	/**
+	 * Deletes given Pokemon based on its Id and returns number of Pokemons deleted.
+	 *
+	 * @return {@link Long}
+	 */
+	@Operation(summary = "Deletes given Pokemon based on its Id.", 
+	        description = "Deletes given Pokemon based on its Id and returns number of Pokemons deleted.")
 	@DELETE
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -225,6 +239,5 @@ public class PokemonResource {
 		}
 
 	}
-	// deleteById
 
 }

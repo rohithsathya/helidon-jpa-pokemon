@@ -14,8 +14,6 @@ import javax.persistence.criteria.Root;
 
 import com.rsat.helidon.pokemon.entity.Pokemon;
 
-
-
 @ApplicationScoped
 public class PokemonRepositoryImpl implements PokemonRepository {
 
@@ -76,16 +74,14 @@ public class PokemonRepositoryImpl implements PokemonRepository {
 
 	@Override
 	public long deleteById(String Id) {
-		Pokemon pokemon =  getById(Id);
-		if(pokemon != null) {
+		Pokemon pokemon = getById(Id);
+		if (pokemon != null) {
 			this.entityManager.remove(pokemon);
-			return 1;
-		}else {
+			return 1; // since we are deleting only 1 Pokemon we are sending 1
+		} else {
 			return 0;
 		}
-		
-	}
 
-	
+	}
 
 }
